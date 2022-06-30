@@ -1,0 +1,52 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>StudentsBlazorApp</PageTitle>
+<MudThemeProvider Theme="@_currentTheme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+
+
+<MudLayout>
+    <MudAppBar>
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+            Student Management App
+        @*
+            <MudItem xs="8" sm="8"></MudItem>
+        *@
+        <MudSpacer />
+        <MudTooltip Text="Toggle Dark/Light">
+
+            <MudIconButton Class="" Icon="@Icons.Filled.Brightness6" Color="Color.Default" OnClick="@((e) => DarkMode())"></MudIconButton>
+        </MudTooltip>
+    </MudAppBar>
+    <MudDrawer @bind-Open="@_drawerOpen">
+        <NavMenu />
+    </MudDrawer>
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Medium">
+
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@*<div class="page">
+    <div class="sidebar">
+    <NavMenu />
+    </div>
+
+    <main>
+    <div class="top-row px-4">
+    <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+    </div>
+
+    <article class="content px-4">
+    @Body
+    </article>
+    </main>
+    </div>
+*@
+@code {
+
+}

@@ -1,0 +1,228 @@
+﻿@page "/"
+@inject NavigationManager Navigation
+@inject StudentsService service
+@inject MudBlazor.ISnackbar snackBar
+
+
+<PageTitle>Index</PageTitle>
+
+
+
+
+<MudGrid>
+
+    <MudItem xs="12" sm="6" Class="d-flex align-center justify-center mud-width-full py-8">
+
+        <MudCard Class="pa-4 mud-elevation-10">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h5" Align="Align.Center">Statistics </MudText>
+                </CardHeaderContent>
+                <CardHeaderActions>
+                    <MudIconButton Icon="@Icons.Material.Filled.PieChart" Color="Color.Success" />
+                </CardHeaderActions>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudText Typo="Typo.h6" Align="Align.Center"><strong>Averagre Student Age is: </strong> @getaverageAge()</MudText>
+
+                <MudText Typo="Typo.subtitle1" Align="Align.Center"><strong>Total Number of Students: </strong> @students_list.Count</MudText>
+                <MudText Typo="Typo.subtitle1" Align="Align.Center"><strong>Total Number of Countries: </strong> @countries_list.Count</MudText>
+                <MudText Typo="Typo.subtitle1" Align="Align.Center"><strong>Total Number of Classes: </strong> @classes_list.Count</MudText>
+            </MudCardContent>
+            @*                <MudCardActions>
+                <MudButton Variant="Variant.Text" Color="Color.Primary">Read More</MudButton>
+                </MudCardActions>*@
+        </MudCard>
+
+    </MudItem>
+    <MudItem xs="12" sm="6">
+
+    </MudItem>
+    <MudItem xs="12" sm="6">
+
+        @if (countries_list == null)
+        {
+            <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+        }
+        else
+        {
+            <MudText Typo="Typo.h6">Countries</MudText>
+            <br />
+            @*            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick=SeedCountryData>add a country</MudButton>
+            *@
+
+            <MudTable Elevation="10" Items="@countries_list" Hover="true" Dense=true Striped=true Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
+                <HeaderContent>
+@*                    <MudTh>Id</MudTh>
+*@                    <MudTh>name</MudTh>
+                    <MudTh>Number of Students</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+@*                    <MudTd DataLabel="Nr">@context.Id</MudTd>
+*@                    <MudTd DataLabel="Name">@context.CountryName</MudTd>
+                    <MudTd DataLabel="Count">@context.StudentsList.Count</MudTd>
+
+                </RowTemplate>
+
+            </MudTable>
+        }
+    </MudItem>
+
+    <MudItem xs="12" sm="6">
+
+        @if (classes_list == null)
+        {
+            <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+        }
+        else
+        {
+            <MudText Typo="Typo.h6">Classes</MudText>
+            <br />
+            @*            <MudButton Variant="Variant.Filled" Color="Color.Primary" >add a class</MudButton>
+            *@
+
+            <MudTable Elevation="10" Items="@classes_list" Hover="true" Dense=true Striped=true Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
+                <HeaderContent>
+@*                    <MudTh>Id</MudTh>
+*@                    <MudTh>name</MudTh>
+                    <MudTh>Number of Students</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+@*                    <MudTd DataLabel="Nr">@context.Id</MudTd>
+*@                    <MudTd DataLabel="Name">@context.ClassName</MudTd>
+                    <MudTd DataLabel="Count">@context.studentsList.Count</MudTd>
+
+                </RowTemplate>
+
+            </MudTable>
+        }
+    </MudItem>
+    @*    <MudItem xs="12" sm="6" >
+        <MudPaper Class="d-flex align-center justify-center mud-width-full py-8">xs=12 sm=6</MudPaper>
+        </MudItem>*@
+    @*    <MudItem xs="12">
+
+        @if (students_list == null)
+        {
+        <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+        }
+        else
+        {
+
+
+        <MudText Typo="Typo.h6">Students</MudText>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick=SeedStdntData>add a student</MudButton>
+
+        <MudTable Items="@students_list" Hover="true" Dense=true Striped=true Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
+        <HeaderContent>
+        <MudTh>Id</MudTh>
+        <MudTh>name</MudTh>
+        <MudTh>date of birth</MudTh>
+        <MudTh>class</MudTh>
+        <MudTh>country</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+        <MudTd DataLabel="Nr">@context.Id</MudTd>
+        <MudTd DataLabel="Name">@context.StudentName</MudTd>
+        <MudTd DataLabel="DOB">@context.DateOfBirth.ToString("dd/MM/yyyy")</MudTd>
+        <MudTd DataLabel="Class">@context.StudentClass.ClassName</MudTd>
+        <MudTd DataLabel="Country">@context.StudentCountry.CountryName</MudTd>
+        </RowTemplate>
+
+        </MudTable>
+
+        }
+
+        </MudItem>*@
+
+</MudGrid>
+
+
+
+
+
+
+@code {
+    private MudTheme Theme = new MudTheme();
+
+    private List<Students> students_list;
+    private List<CountriesMaster> countries_list;
+    private List<Classes> classes_list;
+
+    protected override async Task OnInitializedAsync()
+    {
+        students_list = await service.GetStudentsAsync();
+
+        countries_list = await service.GetCountriesAsync();
+
+        classes_list = await service.GetClassesAsync();
+    }
+
+
+    //private void SeedCountryData()
+    //{
+
+    //    service.GenerateCountry();
+    //    //  Navigation.NavigateTo("/");
+    //}
+    //private void SeedStdntData()
+    //{
+    //    try
+    //    {
+    //        service.GenerateStudents();
+
+    //        snackBar.Add("Success", Severity.Success, config =>
+    //      {
+    //          config.RequireInteraction = true;
+    //          config.ShowCloseIcon = true;
+    //          config.Onclick = snackbar =>
+    //              {
+    //                  return Task.CompletedTask;
+    //              };
+    //      });
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        snackBar.Add("Couldnt add a student!", Severity.Error);
+
+    //    }
+    //    //if (service.GenerateStudents() == 1)
+    //    //{
+    //    //    snackBar.Add("Success", Severity.Success, config =>
+    //    //            {
+    //    //                config.RequireInteraction = true;
+    //    //                config.ShowCloseIcon = true;
+    //    //                config.Onclick = snackbar =>
+    //    //                    {
+    //    //                        return Task.CompletedTask;
+    //    //                    };
+    //    //            });
+    //    //}
+    //    //else
+    //    //{
+    //    //    snackBar.Add("Error", Severity.Error);
+
+    //    //}
+    //    Navigation.NavigateTo("/");
+
+    //}
+    private Int32 getaverageAge()
+    {
+        if (students_list != null && students_list.Count != 0)
+        {
+            List<DateTime> DateOBirth = new List<DateTime>();
+
+            foreach (Students stdnt in students_list)
+            {
+                DateOBirth.Add(stdnt.DateOfBirth);
+            }
+            Int32 dobAverage = Convert.ToInt32(DateOBirth.Average(DateOBirth => (DateTime.Now.Year - DateOBirth.Year)));
+            return dobAverage;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+}

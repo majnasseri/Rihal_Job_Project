@@ -1,0 +1,211 @@
+﻿@page "/countries"
+@inject NavigationManager Navigation
+@inject StudentsService service
+@inject MudBlazor.ISnackbar snackBar
+@inject IDialogService DialogService
+
+
+
+<MudDialog @bind-IsVisible="DeleteDialogvisible" Options="dialogOptions">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Edit" Class="mr-3" /> Delete Country
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value=@country.Id Label="Id" ReadOnly="true" />
+        <MudTextField @bind-Value=@country.CountryName Label="Country" ReadOnly="true" />
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="DelCancel">Cancel</MudButton>
+        <MudButton Color="Color.Error" OnClick="DeleteCountry">Delete</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+<MudDialog @bind-IsVisible="EditDialogVisible" Options="dialogOptions">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Edit" Class="mr-3" /> Edit Country
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value=@country.Id Label="Id" ReadOnly="true" />
+        <MudTextField @bind-Value=@country.CountryName Label="Country" />
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="EditCancel">Cancel</MudButton>
+        <MudButton Color="Color.Success" OnClick="EditCountryItem">Update</MudButton>
+    </DialogActions>
+</MudDialog>
+<MudGrid>
+
+
+    <MudItem xs="12">
+
+        @if (countries_list == null)
+        {
+            <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+        }
+        else
+        {
+
+            @*           <div class="accordion-body">
+                <h3>Average students age</h3>
+
+                <p>@getaverageAge()</p>
+
+                </div>*@
+            <MudText Typo="Typo.h6">Countries</MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick=SeedCountryData>Auto generate a Country</MudButton>
+
+            <MudTable Items="@countries_list" Hover="true" Dense="true" Striped=true Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
+                <HeaderContent>
+                    <MudTh>Id</MudTh>
+                    <MudTh>name</MudTh>
+
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Nr">@context.Id</MudTd>
+                    <MudTd DataLabel="Name">@context.CountryName</MudTd>
+
+                    <MudTd DataLabel="Action">
+                        <MudFab @onclick="@(()=>OpenEditDialog(@context.Id))" Color="Color.Primary" Icon="@Icons.Material.Outlined.Edit" Size="Size.Small" IconSize="Size.Small" />
+                        <MudFab @onclick="@(()=>OpenDelDialog(@context.Id))" Color="Color.Error" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" IconSize="Size.Small" />
+
+                    </MudTd>
+                    @*              <MudTd>
+                        <a Class="ma-0" Style="color:red;font-weight:bold;" href="stdudent/@context.Id" rel="noopener noreferrer">Edit</a>
+                        </MudTd>*@
+                </RowTemplate>
+
+            </MudTable>
+
+        }
+    </MudItem>
+</MudGrid>
+
+
+@code {
+
+
+    
+    
+
+    private MudTheme Theme = new MudTheme();
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    //public List<Students> students_list = new List<Students>();
+    public List<CountriesMaster> countries_list = new List<CountriesMaster>();
+    //public List<Classes> class_list = new List<Classes>();
+    private CountriesMaster country = new CountriesMaster();
+
+    //Delete Dialog
+    private DialogOptions dialogOptions = new() { FullWidth = true };
+    private bool DeleteDialogvisible;
+
+    //Edit Dialog
+    private bool EditDialogVisible;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //students_list = await service.GetStudentsAsync();
+        countries_list = await service.GetCountriesAsync();
+        //  class_list = await service.GetClassesAsync();
+
+
+
+    }
+    private void OpenDelDialog(int id)
+    {
+        country = countries_list.FirstOrDefault(c => c.Id == id);
+        DeleteDialogvisible = true;
+
+    }
+    private void DelCancel()
+    {
+        DeleteDialogvisible = false;
+    }
+
+    private void OpenEditDialog(int id)
+    {
+        country = countries_list.FirstOrDefault(c => c.Id == id);
+        EditDialogVisible = true;
+
+    }
+    private void EditCancel()
+    {
+        EditDialogVisible = false;
+    }
+
+
+    private async Task SeedCountryData()
+    {
+
+        try
+        {
+            service.GenerateCountry();
+
+            snackBar.Add("Success", Severity.Success, config =>
+          {
+              config.RequireInteraction = true;
+              config.ShowCloseIcon = true;
+              config.Onclick = snackbar =>
+                  {
+                      return Task.CompletedTask;
+                  };
+              // config.HideTransitionDuration = 10;
+
+          });
+            countries_list = await service.GetCountriesAsync();
+        }
+        catch (Exception ex)
+        {
+            snackBar.Add("Couldnt add a Country!", Severity.Error);
+
+        }
+
+        //  Navigation.NavigateTo("/");
+    }
+
+    private async Task EditCountryItem()
+    {
+
+        try
+        {
+            service.EditCountry(country);
+            EditDialogVisible = false;
+            snackBar.Add("Success!", Severity.Success);
+
+        }
+        catch (Exception ex)
+        {
+            snackBar.Add("Error!", Severity.Error);
+
+        }
+        countries_list = (await service.GetCountriesAsync()).ToList();
+
+    }
+
+    private async Task DeleteCountry()
+    {
+        try
+        {
+            service.DeleteCountry(country);
+            DeleteDialogvisible = false;
+            snackBar.Add("Success!", Severity.Success);
+
+        }
+        catch (Exception ex)
+        {
+            snackBar.Add("Couldnt delete Country!", Severity.Error);
+
+        }
+        countries_list = (await service.GetCountriesAsync()).ToList();
+    }
+
+
+}
+

@@ -1,0 +1,89 @@
+﻿@inject ISnackbar snackBar
+@inject StudentsService service
+@inject NavigationManager Navigation
+
+
+<style>
+    .wide_d {
+        max-width: none !important;
+        width: 500px !important;
+    }
+</style>
+<MudGrid>
+
+    <MudItem xs="12">
+        <MudDialog Style="width:500px !important;">
+            <TitleContent>
+                <MudText Typo="Typo.h6">
+                    <MudIcon Icon="@Icons.Material.Filled.Edit" Class="mr-3 mb-n1" />
+                    Edit Student
+                </MudText>
+            </TitleContent>
+            <DialogContent>
+                <MudTextField @bind-Value=@student.Id Label="Student ID" ReadOnly="true" />
+                <MudTextField @bind-Value=@student.StudentName id="stdntName" Label="Student Name" />
+                <MudDatePicker label="date of birth" @bind-Date="DOB" DateFormat="dd/MM/yyyy" AdornmentColor=Color.Primary />
+                <MudSelect T="CountriesMaster" Label="Country" Clearable="true" Required="true" @bind-Value="@student.StudentCountry" AdornmentIcon="@Icons.Rounded.Flag" AdornmentColor="Color.Tertiary">
+                    @foreach (var country in countries_list)
+                    {
+                        <MudSelectItem Value="@country">@country.CountryName</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudSelect T="Classes" Label="Class" Clearable="true" Required="true" @bind-Value="@student.StudentClass" AdornmentIcon="@Icons.Material.Filled.Book" AdornmentColor="Color.Secondary">
+                    @foreach (var c in class_list)
+                    {
+                        <MudSelectItem Value=@c>@c.ClassName</MudSelectItem>
+                    }
+                </MudSelect>
+            </DialogContent>
+            <DialogActions>
+                <MudButton OnClick="Cancel">Cancel</MudButton>
+                <MudButton Color="Color.Success" OnClick="submitForm">Update</MudButton>
+            </DialogActions>
+        </MudDialog>
+    </MudItem>
+</MudGrid>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public Students student { get; set; } = new Students();
+    [Parameter] public DateTime? DOB { get; set; } = new DateTime();
+    [Parameter] public List<CountriesMaster> countries_list { get; set; } = new List<CountriesMaster>();
+    [Parameter] public List<Classes> class_list { get; set; } = new List<Classes>();
+    [Parameter] public CountriesMaster country0 { get; set; } = new CountriesMaster();
+
+    //DateTime? date = DateTime.Now;
+
+
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    //private void DeleteServer()
+    //{
+    //    //In a real world scenario this bool would probably be a service to delete the item from api/database
+    //    Snackbar.Add("Student Updated", Severity.Success);
+    //    MudDialog.Close(DialogResult.Ok(student.Id));
+    //}
+    private async Task submitForm()
+    {
+        try
+        {
+
+            student.DateOfBirth = (DateTime)DOB;
+            service.UpdateStudent(student);
+
+            student = new Students();
+            snackBar.Add("Student Saved.", Severity.Success);
+            Navigation.NavigateTo("/studentsList");
+        }
+        catch (Exception e)
+        {
+            snackBar.Add("Error!", Severity.Error);
+
+        }
+    }
+}
